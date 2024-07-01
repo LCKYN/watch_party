@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>YouTube Video Details</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+    </head>
+    <body>
+        <h1>YouTube Video Details</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div>
+                <label for="id_video_url">YouTube Video URL:</label>
+                {{ form.video_url }}
+            </div>
+            <div class="time-input">
+                <div>
+                    <label for="id_start_time_minutes">Start Time (Minutes):</label>
+                    {{ form.start_time_minutes }}
+                </div>
+                <div>
+                    <label for="id_start_time_seconds">Start Time (Seconds):</label>
+                    {{ form.start_time_seconds }}
+                </div>
+            </div>
+            <div class="time-input">
+                <div>
+                    <label for="id_end_time_minutes">End Time (Minutes):</label>
+                    {{ form.end_time_minutes }}
+                </div>
+                <div>
+                    <label for="id_end_time_seconds">End Time (Seconds):</label>
+                    {{ form.end_time_seconds }}
+                </div>
+            </div>
+            {% if form.non_field_errors %}
+                <div class="error">
+                    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+            {% endif %}
+            <button type="submit">Get Video Details</button>
+        </form>
+        {% if video_title %}
+            <h2>Video Details:</h2>
+            <p>Title: {{ video_title }}</p>
+            <p>Age Restricted: {{ age_restricted }}</p>
+            <p>Duration: {{ video_duration }}</p>
+            <p>Start Time: {{ start_time }} sec</p>
+            <p>End Time: {{ end_time }} sec</p>
+            {% if video_id %}
+                <div>
+                    <iframe width="560"
+                            height="315"
+                            src="https://www.youtube.com/embed/{{ video_id }}?start={{ start_time_seconds }}&end={{ end_time_seconds }}&autoplay=1"
+                            frameborder="0"
+                            allowfullscreen
+                            allow="autoplay"></iframe>
+                </div>
+            {% endif %}
+        {% endif %}
+    </body>
+</html>
+
+
+{% comment %} 9eOPQI1NJzZABCJGETU9LVJmLaYiguUu
+iooDdFHUPvi5HHEI
+
+{
+    "Authorization": "Basic OWVPUFFJMU5KelpBQkNKR0VUVTlMVkptTGFZaWd1VXU6aW9vRGRGSFVQdmk1SEhFSQ==",
+    "Content-Type": "application/x-www-form-urlencoded",
+    "x-test-mode": "true",
+     "env-id" : "OAUTH2"
+  }
+
+{
+    "developer.email": "t.pawarit@lckyn.com",
+    "token_type": "Bearer",
+    "client_id": "9eOPQI1NJzZABCJGETU9LVJmLaYiguUu",
+    "access_token": "n0zq5dcHKf5Jkd8tO8yAgo9iy97a",
+    "scope": "",
+    "expires_in": "1799",
+    "status": "approved"
+  } {% endcomment %}
