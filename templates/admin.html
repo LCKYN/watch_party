@@ -67,8 +67,8 @@
 
 <h2>Current User Submissions</h2>
 <ul>
-    {% for user_id, count in user_submissions.items() %}
-    <li>User ID: {{ user_id }} - Submissions: {{ count }}</li>
+    {% for user_id, remaining_time in user_submissions.items() %}
+    <li>User ID: {{ user_id }} - Remaining Time: {{ remaining_time }} seconds</li>
     {% endfor %}
 </ul>
 

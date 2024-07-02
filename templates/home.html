@@ -4,7 +4,7 @@
 {% block content %}
 <h1>Add Video to Queue</h1>
 
-<p>You have {{ submissions_left }} submission{% if submissions_left != 1 %}s{% endif %} left.</p>
+<p>You have {{ remaining_duration }} seconds of submission time left.</p>
 
 <form id="videoForm" method="post">
     <label for="youtube_url">YouTube URL:</label>
@@ -53,7 +53,7 @@
 
 
 <script>
-    function validateTimes() {
+    function validateForm() {
         var startMin = parseInt(document.getElementById('start_min').value) || 0;
         var startSec = parseInt(document.getElementById('start_sec').value) || 0;
         var endMin = parseInt(document.getElementById('end_min').value) || 0;
@@ -61,14 +61,17 @@
 
         var startTime = startMin * 60 + startSec;
         var endTime = endMin * 60 + endSec;
+        var duration = endTime - startTime;
 
-        if (startTime >= endTime) {
-            alert("End time must be after start time.");
+        var remainingTime = {{ remaining_duration }};
+
+        if (duration > remainingTime) {
+            alert("Video duration (" + duration + " seconds) exceeds your remaining submission time (" + remainingTime + " seconds). Please choose a shorter clip.");
             return false;
         }
 
-        if (endTime - startTime > 180) {
-            alert("Video clip cannot be longer than 3 minutes.");
+        if (startTime >= endTime) {
+            alert("End time must be after start time.");
             return false;
         }
 

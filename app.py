@@ -1,4 +1,5 @@
 import os
+import time
 import uuid
 from functools import wraps  # Add this line
 from threading import Lock, RLock
@@ -48,6 +49,8 @@ STREAMER_IDS = ["239871840691027969", "341560715615797251"]
 video_queue = []
 
 banned_users = set()
+user_submissions = {}  # Will store {user_id: (total_duration, last_submission_time)}
+MAX_SUBMISSION_DURATION = 300  # 5 minutes in seconds
 
 
 def login_required(f):
@@ -80,28 +83,16 @@ def streamer_required(f):
     return decorated_function
 
 
-user_submissions = {}
-MAX_SUBMISSIONS = 3
-
-
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def home():
+    user_id = session["user_info"]["id"]
+
     if request.method == "POST":
-        user_id = session["user_info"]["id"]
         user_ip = request.remote_addr
 
         if user_id in banned_users:
             flash("You are banned from submitting videos.", "error")
-            return redirect(url_for("home"))
-
-        if user_ip in banned_users:
-            flash("Your IP address is banned from submitting videos.", "error")
-            return redirect(url_for("home"))
-
-        # Check if user has reached the submission limit
-        if user_submissions.get(user_id, 0) >= MAX_SUBMISSIONS:
-            flash("You have reached the maximum number of video submissions.", "error")
             return redirect(url_for("home"))
 
         youtube_url = request.form.get("youtube_url")
@@ -117,6 +108,14 @@ def home():
 
         start_time = start_min * 60 + start_sec
         end_time = end_min * 60 + end_sec
+        duration = end_time - start_time
+
+        # Check if user has enough submission duration available
+        remaining_duration = user_submissions.get(user_id, MAX_SUBMISSION_DURATION)
+
+        if duration > remaining_duration:
+            flash(f"Not enough submission time available. You have {remaining_duration} seconds left.", "error")
+            return redirect(url_for("home"))
 
         video_info = get_video_info(video_id)
         user_info = session["user_info"]
@@ -124,26 +123,26 @@ def home():
         with queue_lock:
             video_queue.append(
                 {
-                    "id": str(uuid.uuid4()),  # Add this line
+                    "id": str(uuid.uuid4()),
                     "video_id": video_id,
                     "start_time": start_time,
                     "end_time": end_time,
                     "video_info": video_info,
                     "user_info": user_info,
                     "user_ip": user_ip,
-                    "user_id": user_id,
                 }
             )
 
-        # Increment user's submission count
-        user_submissions[user_id] = user_submissions.get(user_id, 0) + 1
+        # Update user's remaining submission time
+        user_submissions[user_id] = remaining_duration - duration
 
         flash("Video added to queue", "success")
         return redirect(url_for("home"))
 
-    return render_template(
-        "home.html", submissions_left=MAX_SUBMISSIONS - user_submissions.get(session["user_info"]["id"], 0)
-    )
+    # Get remaining submission time for the user
+    remaining_duration = user_submissions.get(user_id, MAX_SUBMISSION_DURATION)
+
+    return render_template("home.html", remaining_duration=remaining_duration)
 
 
 @app.route("/login")
@@ -197,8 +196,8 @@ def admin():
         elif action == "clear_user_submissions":
             user_id = request.form.get("user_id")
             if user_id in user_submissions:
-                del user_submissions[user_id]
-                flash(f"Submissions for user {user_id} have been cleared.", "success")
+                user_submissions[user_id] = MAX_SUBMISSION_DURATION
+                flash(f"Submission time for user {user_id} has been reset to maximum.", "success")
             else:
                 flash(f"No submissions found for user {user_id}.", "warning")
 
