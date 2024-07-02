@@ -157,6 +157,19 @@ def clear_queue():
     return redirect(url_for("admin"))
 
 
+@app.route("/unban", methods=["POST"])
+@login_required
+@admin_required
+def unban():
+    to_unban = request.form.get("to_unban")
+    if to_unban in banned_users:
+        banned_users.remove(to_unban)
+        flash(f"Successfully unbanned: {to_unban}", "success")
+    else:
+        flash(f"{to_unban} was not in the banned list.", "warning")
+    return redirect(url_for("admin"))
+
+
 @app.route("/admin", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -186,8 +199,15 @@ def admin():
             user_submissions.clear()
             flash("All user submissions have been cleared.", "success")
 
+    banned_user_ids = [b for b in banned_users if not b.replace(".", "").isdigit()]
+    banned_ips = [b for b in banned_users if b.replace(".", "").isdigit()]
+
     return render_template(
-        "admin.html", banned_users=banned_users, user_submissions=user_submissions, queue_length=len(video_queue)
+        "admin.html",
+        banned_user_ids=banned_user_ids,
+        banned_ips=banned_ips,
+        user_submissions=user_submissions,
+        queue_length=len(video_queue),
     )
 
 
