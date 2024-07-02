@@ -22,6 +22,7 @@
         <p><strong>End Time:</strong> {{ '%02d:%02d' % (video.end_time // 60, video.end_time % 60) }}</p>
         {% set duration = video.end_time - video.start_time %}
         <p><strong>Duration:</strong> {{ '%02d:%02d' % (duration // 60, duration % 60) }}</p>
+        <p><strong>Status:</strong> {% if video.passed %}Passed{% else %}Not Passed{% endif %}</p>
         <div class="button-group">
             <form action="{{ url_for('delete_from_queue', video_id=video.id) }}" method="post">
                 <button type="submit" class="btn delete-btn">Delete</button>
@@ -29,6 +30,11 @@
             <form action="{{ url_for('ban_user', user_id=video.user_info.id) }}" method="post">
                 <button type="submit" class="btn ban-btn">Ban User</button>
             </form>
+            {% if not video.passed %}
+            <form action="{{ url_for('pass_video', video_id=video.id) }}" method="post">
+                <button type="submit" class="btn pass-btn">Pass</button>
+            </form>
+            {% endif %}
         </div>
     </div>
 </div>
