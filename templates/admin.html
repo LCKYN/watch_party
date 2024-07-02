@@ -33,6 +33,12 @@
     <button type="submit" class="btn clear-btn">Clear All Submissions</button>
 </form>
 
+<h2>Clear Entire Queue</h2>
+<p>Current queue length: {{ queue_length }}</p>
+<form action="{{ url_for('clear_queue') }}" method="POST">
+    <button type="submit" class="btn clear-btn" onclick="return confirm('Are you sure you want to clear the entire queue?');">Clear Entire Queue</button>
+</form>
+
 <h2>Current Banned Users and IPs</h2>
 <ul>
     {% for banned in banned_users %}

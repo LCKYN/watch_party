@@ -147,6 +147,16 @@ def login():
     )
 
 
+@app.route("/clear_queue", methods=["POST"])
+@login_required
+@admin_required
+def clear_queue():
+    global video_queue
+    video_queue.clear()
+    flash("All videos have been removed from the queue.", "success")
+    return redirect(url_for("admin"))
+
+
 @app.route("/admin", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -176,7 +186,9 @@ def admin():
             user_submissions.clear()
             flash("All user submissions have been cleared.", "success")
 
-    return render_template("admin.html", banned_users=banned_users, user_submissions=user_submissions)
+    return render_template(
+        "admin.html", banned_users=banned_users, user_submissions=user_submissions, queue_length=len(video_queue)
+    )
 
 
 @app.route("/callback")
