@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Admin Panel</h1>
+
+<h2>Ban User</h2>
+<form method="POST">
+    <input type="hidden" name="action" value="ban_user">
+    <label for="user_id">User ID:</label>
+    <input type="text" id="user_id" name="user_id" required>
+    <button type="submit" class="btn ban-btn">Ban User</button>
+</form>
+
+<h2>Ban IP Address</h2>
+<form method="POST">
+    <input type="hidden" name="action" value="ban_ip">
+    <label for="ip_address">IP Address:</label>
+    <input type="text" id="ip_address" name="ip_address" required>
+    <button type="submit" class="btn ban-btn">Ban IP</button>
+</form>
+
+<h2>Clear User Submissions</h2>
+<form method="POST">
+    <input type="hidden" name="action" value="clear_user_submissions">
+    <label for="clear_user_id">User ID:</label>
+    <input type="text" id="clear_user_id" name="user_id" required>
+    <button type="submit" class="btn clear-btn">Clear User Submissions</button>
+</form>
+
+<h2>Clear All User Submissions</h2>
+<form method="POST">
+    <input type="hidden" name="action" value="clear_all_submissions">
+    <button type="submit" class="btn clear-btn">Clear All Submissions</button>
+</form>
+
+<h2>Current Banned Users and IPs</h2>
+<ul>
+    {% for banned in banned_users %}
+    <li>{{ banned }}</li>
+    {% endfor %}
+</ul>
+
+<h2>Current User Submissions</h2>
+<ul>
+    {% for user_id, count in user_submissions.items() %}
+    <li>User ID: {{ user_id }} - Submissions: {{ count }}</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

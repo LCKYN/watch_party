@@ -85,6 +85,10 @@ def home():
             flash("You are banned from submitting videos.", "error")
             return redirect(url_for("home"))
 
+        if user_ip in banned_users:
+            flash("Your IP address is banned from submitting videos.", "error")
+            return redirect(url_for("home"))
+
         # Check if user has reached the submission limit
         if user_submissions.get(user_id, 0) >= MAX_SUBMISSIONS:
             flash("You have reached the maximum number of video submissions.", "error")
@@ -134,6 +138,38 @@ def login():
     return redirect(
         f"{DISCORD_AUTH_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=identify"
     )
+
+
+@app.route("/admin", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin():
+    if request.method == "POST":
+        action = request.form.get("action")
+
+        if action == "ban_user":
+            user_id = request.form.get("user_id")
+            banned_users.add(user_id)
+            flash(f"User {user_id} has been banned.", "success")
+
+        elif action == "ban_ip":
+            ip_address = request.form.get("ip_address")
+            banned_users.add(ip_address)
+            flash(f"IP address {ip_address} has been banned.", "success")
+
+        elif action == "clear_user_submissions":
+            user_id = request.form.get("user_id")
+            if user_id in user_submissions:
+                del user_submissions[user_id]
+                flash(f"Submissions for user {user_id} have been cleared.", "success")
+            else:
+                flash(f"No submissions found for user {user_id}.", "warning")
+
+        elif action == "clear_all_submissions":
+            user_submissions.clear()
+            flash("All user submissions have been cleared.", "success")
+
+    return render_template("admin.html", banned_users=banned_users, user_submissions=user_submissions)
 
 
 @app.route("/callback")
