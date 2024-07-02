@@ -27,6 +27,7 @@
     <p id="example-url"></p>
     <p id="example-start-time"></p>
     <p id="example-end-time"></p>
+    <p id="example-duration"></p>
     <div class="example-video-container">
         <iframe id="example-video"
                 src=""
@@ -108,6 +109,7 @@
         document.getElementById('example-url').textContent = 'YouTube URL: ' + youtubeUrl;
         document.getElementById('example-start-time').textContent = 'Start Time: ' + startMin + ' minutes ' + startSec + ' seconds';
         document.getElementById('example-end-time').textContent = 'End Time: ' + endMin + ' minutes ' + endSec + ' seconds';
+        document.getElementById('example-duration').textContent = 'Duration: ' + (endTime - startTime) + ' seconds';
 
         var embedUrl = 'https://www.youtube.com/embed/' + videoId + '?start=' + startTime + '&end=' + endTime;
         document.getElementById('example-video').src = embedUrl;
