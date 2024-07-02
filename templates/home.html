@@ -75,25 +75,21 @@
             return false;
         }
 
+        if (duration > 180) {
+            alert("Video clip cannot be longer than 3 minutes.");
+            return false;
+        }
+
         return true;
     }
 
     function validateAndShowExample() {
-        if (validateTimes()) {
+        if (validateForm()) {
             showExample();
         }
     }
 
-    function validateForm() {
-        if (!validateTimes()) {
-            return false;
-        }
-        // Add any additional form validation here if needed
-        return true;
-    }
-
     function showExample() {
-        // Your existing showExample code here
         var youtubeUrl = document.getElementById('youtube_url').value;
         var startMin = parseInt(document.getElementById('start_min').value) || 0;
         var startSec = parseInt(document.getElementById('start_sec').value) || 0;
@@ -124,7 +120,7 @@
         var match = url.match(regExp);
         return (match && match[7].length == 11) ? match[7] : false;
     }
-    </script>
+</script>
 {% endblock %}
 
 

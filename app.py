@@ -114,7 +114,10 @@ def home():
         remaining_duration = user_submissions.get(user_id, MAX_SUBMISSION_DURATION)
 
         if duration > remaining_duration:
-            flash(f"Not enough submission time available. You have {remaining_duration} seconds left.", "error")
+            flash(
+                f"Video duration ({duration} seconds) exceeds your remaining submission time ({remaining_duration} seconds). Please choose a shorter clip.",
+                "error",
+            )
             return redirect(url_for("home"))
 
         video_info = get_video_info(video_id)
