@@ -1,5 +1,7 @@
 import os
+import uuid
 from functools import wraps  # Add this line
+from threading import Lock, RLock
 from urllib.parse import parse_qs, urlparse
 
 import requests
@@ -15,6 +17,7 @@ from flask import (
     url_for,
 )
 
+queue_lock = RLock()
 load_dotenv()
 
 app = Flask(__name__)
@@ -118,16 +121,18 @@ def home():
         video_info = get_video_info(video_id)
         user_info = session["user_info"]
 
-        video_queue.append(
-            {
-                "video_id": video_id,
-                "start_time": start_time,
-                "end_time": end_time,
-                "video_info": video_info,
-                "user_info": user_info,
-                "user_ip": user_ip,
-            }
-        )
+        with queue_lock:
+            video_queue.append(
+                {
+                    "id": str(uuid.uuid4()),  # Add this line
+                    "video_id": video_id,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "video_info": video_info,
+                    "user_info": user_info,
+                    "user_ip": user_ip,
+                }
+            )
 
         # Increment user's submission count
         user_submissions[user_id] = user_submissions.get(user_id, 0) + 1
@@ -152,7 +157,8 @@ def login():
 @admin_required
 def clear_queue():
     global video_queue
-    video_queue.clear()
+    with queue_lock:
+        video_queue.clear()
     flash("All videos have been removed from the queue.", "success")
     return redirect(url_for("admin"))
 
@@ -229,15 +235,18 @@ def callback():
     return redirect(url_for("home"))
 
 
-@app.route("/delete_from_queue/<int:queue_number>", methods=["POST"])
+@app.route("/delete_from_queue/<string:video_id>", methods=["POST"])
 @login_required
 @admin_required
-def delete_from_queue(queue_number):
-    if 0 <= queue_number < len(video_queue):
-        del video_queue[queue_number]
-        flash("Video removed from queue", "success")
-    else:
-        flash("Invalid queue number", "error")
+def delete_from_queue(video_id):
+    with queue_lock:
+        for index, video in enumerate(video_queue):
+            if video["id"] == video_id:
+                del video_queue[index]
+                flash("Video removed from queue", "success")
+                break
+        else:
+            flash("Video not found in queue", "error")
     return redirect(url_for("queue_management"))
 
 
@@ -245,7 +254,8 @@ def delete_from_queue(queue_number):
 @login_required
 @admin_required
 def queue_management():
-    return render_template("queue_management.html", video_queue=video_queue)
+    with queue_lock:
+        return render_template("queue_management.html", video_queue=video_queue)
 
 
 @app.route("/ban_user/<string:user_id>", methods=["POST"])
@@ -266,12 +276,13 @@ def ban_user(user_id):
 @login_required
 @streamer_required
 def video_player():
-    if video_queue:
-        video = video_queue[0]
-        queue_length = len(video_queue)
-    else:
-        video = None
-        queue_length = 0
+    with queue_lock:
+        if video_queue:
+            video = video_queue[0]
+            queue_length = len(video_queue)
+        else:
+            video = None
+            queue_length = 0
     return render_template("video_player.html", video=video, queue_length=queue_length)
 
 
@@ -279,9 +290,10 @@ def video_player():
 @login_required
 @streamer_required
 def next_video():
-    if video_queue:
-        played_video = video_queue.pop(0)
-        user_id = played_video["user_info"]["id"]
+    with queue_lock:
+        if video_queue:
+            played_video = video_queue.pop(0)
+            user_id = played_video["user_info"]["id"]
     return redirect(url_for("video_player"))
 
 
