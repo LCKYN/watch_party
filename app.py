@@ -79,6 +79,7 @@ MAX_SUBMISSIONS = 3
 def home():
     if request.method == "POST":
         user_id = session["user_info"]["id"]
+        user_ip = request.remote_addr
 
         if user_id in banned_users:
             flash("You are banned from submitting videos.", "error")
@@ -113,6 +114,7 @@ def home():
                 "end_time": end_time,
                 "video_info": video_info,
                 "user_info": user_info,
+                "user_ip": user_ip,
             }
         )
 

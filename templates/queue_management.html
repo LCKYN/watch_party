@@ -17,6 +17,7 @@
     <div class="video-details">
         <h2>Queue Number: {{ loop.index }}</h2>
         <p><strong>Submitted By:</strong> {{ video.user_info.username }}#{{ video.user_info.discriminator }}</p>
+        <p><strong>IP:</strong> {{ video.user_ip }}</p>
         <p><strong>Start Time:</strong> {{ '%02d:%02d' % (video.start_time // 60, video.start_time % 60) }}</p>
         <p><strong>End Time:</strong> {{ '%02d:%02d' % (video.end_time // 60, video.end_time % 60) }}</p>
         {% set duration = video.end_time - video.start_time %}
