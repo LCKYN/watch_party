@@ -3,6 +3,7 @@ import time
 import uuid
 from functools import wraps  # Add this line
 from threading import Lock, RLock
+from time import time
 from urllib.parse import parse_qs, urlparse
 
 import requests
@@ -27,7 +28,11 @@ app.secret_key = os.urandom(24)
 # Discord OAuth2 credentials
 CLIENT_ID = "1257410612024053811"
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 REDIRECT_URI = "http://greankingdom.com/callback"
+# REDIRECT_URI = "http://127.0.0.1:8080/callback"
+
+GUILD_ID = "939695971384844338"  # FifaTargrean server
 
 # Discord API endpoints
 DISCORD_AUTH_URL = "https://discord.com/api/oauth2/authorize"
@@ -47,9 +52,9 @@ STREAMER_IDS = ["239871840691027969", "341560715615797251"]
 
 # Video queue
 video_queue = []
-
 banned_users = set()
-user_submissions = {}  # Will store {user_id: (total_duration, last_submission_time)}
+user_submissions = {}
+last_submission_times = {}
 MAX_SUBMISSION_DURATION = 300  # 5 minutes in seconds
 
 
@@ -58,6 +63,8 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if "token" not in session:
             return redirect(url_for("login"))
+        if not session.get("in_guild", False):
+            return redirect(url_for("not_in_guild"))
         return f(*args, **kwargs)
 
     return decorated_function
@@ -90,6 +97,9 @@ def home():
 
     if request.method == "POST":
         user_ip = request.remote_addr
+
+        current_time = time()
+        last_submission_time = last_submission_times.get(user_id, 0)
 
         if user_id in banned_users:
             flash("You are banned from submitting videos.", "error")
@@ -141,19 +151,25 @@ def home():
         # Update user's remaining submission time
         user_submissions[user_id] = remaining_duration - duration
 
+        last_submission_times[user_id] = current_time
         flash("Video added to queue", "success")
         return redirect(url_for("home"))
 
     # Get remaining submission time for the user
     remaining_duration = user_submissions.get(user_id, MAX_SUBMISSION_DURATION)
 
-    return render_template("home.html", remaining_duration=remaining_duration)
+    # Calculate time left before next submission
+    current_time = time()
+    last_submission_time = last_submission_times.get(user_id, 0)
+    cooldown_left = max(0, 5 - (current_time - last_submission_time))
+
+    return render_template("home.html", remaining_duration=remaining_duration, cooldown_left=cooldown_left)
 
 
 @app.route("/login")
 def login():
     return redirect(
-        f"{DISCORD_AUTH_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=identify"
+        f"{DISCORD_AUTH_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=identify%20guilds%20guilds.members.read"
     )
 
 
@@ -237,9 +253,34 @@ def callback():
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     r = requests.post(DISCORD_TOKEN_URL, data=data, headers=headers)
     r.raise_for_status()
-    session["token"] = r.json()["access_token"]
-    session["user_info"] = get_discord_user_info(session["token"])
-    return redirect(url_for("home"))
+
+    # Get the access token
+    access_token = r.json()["access_token"]
+    session["token"] = access_token
+
+    # Get user info
+    user_info = get_discord_user_info(access_token)
+    session["user_info"] = user_info
+
+    # Check if user is in the guild
+    headers = {"Authorization": f"Bot {BOT_TOKEN}"}  # You'll need to set up a bot and get its token
+    guild_member_url = f"{DISCORD_API_URL}/guilds/{GUILD_ID}/members/{user_info['id']}"
+    r = requests.get(guild_member_url, headers=headers)
+
+    if r.status_code == 200:
+        # User is in the guild
+        session["in_guild"] = True
+        return redirect(url_for("home"))
+    else:
+        # User is not in the guild
+        session["in_guild"] = False
+        return redirect(url_for("not_in_guild"))
+
+
+@app.route("/not_in_guild")
+def not_in_guild():
+    session.clear()
+    return render_template("not_in_guild.html")
 
 
 @app.route("/delete_from_queue/<string:video_id>", methods=["POST"])

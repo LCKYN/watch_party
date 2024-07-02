@@ -19,8 +19,13 @@
     <input type="number" id="end_sec" name="end_sec" min="0" max="59" value="0"> seconds<br><br>
 
     <button type="button" onclick="validateAndShowExample()" class="btn example-btn">Show Example</button>
-    <button type="submit" onclick="return validateForm()" class="btn submit-btn" {% if submissions_left == 0 %}disabled{% endif %}>Send Video</button>
+    <button type="submit" id="submitButton" onclick="return validateForm()" class="btn submit-btn"
+            {% if submissions_left == 0 or cooldown_left > 0 %}disabled{% endif %}>
+        Send Video
+    </button>
 </form>
+
+<p id="cooldownMessage" style="display: none;">Please wait <span id="cooldownTime"></span> seconds before submitting again.</p>
 
 <div id="example"style="display: none;">
     <h3>Example:</h3>
@@ -117,11 +122,47 @@
         document.getElementById('example').style.display = 'block';
     }
 
+    function validateAndSubmit() {
+        if (validateForm()) {
+            document.getElementById('submitButton').disabled = true;
+            setTimeout(function() {
+                document.getElementById('submitButton').disabled = false;
+            }, 5000);  // 5000 milliseconds = 5 seconds
+            return true;
+        }
+        return false;
+    }
+
     function extractVideoID(url) {
         var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
         var match = url.match(regExp);
         return (match && match[7].length == 11) ? match[7] : false;
     }
+
+    function updateCooldown() {
+        var cooldownLeft = {{ cooldown_left }};
+        var submitButton = document.getElementById('submitButton');
+        var cooldownMessage = document.getElementById('cooldownMessage');
+        var cooldownTime = document.getElementById('cooldownTime');
+
+    function update() {
+        if (cooldownLeft > 0) {
+            submitButton.disabled = true;
+            cooldownMessage.style.display = 'block';
+            cooldownTime.textContent = cooldownLeft.toFixed(0);
+            cooldownLeft--;
+            setTimeout(update, 1000);
+        } else {
+            submitButton.disabled = false;
+            cooldownMessage.style.display = 'none';
+        }
+    }
+
+        update();
+    }
+
+    // Call this function when the page loads
+    window.onload = updateCooldown;
 </script>
 {% endblock %}
 
