@@ -1,21 +1,26 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+FROM python:3-alpine AS builder
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+RUN python3 -m venv venv
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# Make port 5000 available to the world outside this container
-EXPOSE 5000
+# Stage 2
+FROM python:3-alpine AS runner
 
-# Define environment variable
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
+WORKDIR /app
 
-# Run app.py when the container launches
-CMD ["flask", "run"]
+COPY --from=builder /app/venv venv
+COPY app.py app.py
+
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV FLASK_APP=app/app.py
+
+EXPOSE 8080
+
+CMD ["gunicorn", "--bind" , ":8080", "--workers", "2", "app:app"]
