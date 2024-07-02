@@ -134,6 +134,7 @@ def home():
                     "user_info": user_info,
                     "user_ip": user_ip,
                     "user_id": user_id,
+                    "passed": False,
                 }
             )
 
@@ -278,14 +279,30 @@ def ban_user(user_id):
     return redirect(url_for("queue_management"))
 
 
+@app.route("/pass_video/<string:video_id>", methods=["POST"])
+@login_required
+@admin_required
+def pass_video(video_id):
+    with queue_lock:
+        for video in video_queue:
+            if video["id"] == video_id:
+                video["passed"] = True
+                flash("Video passed for playing", "success")
+                break
+        else:
+            flash("Video not found in queue", "error")
+    return redirect(url_for("queue_management"))
+
+
 @app.route("/player")
 @login_required
 @streamer_required
 def video_player():
     with queue_lock:
-        if video_queue:
-            video = video_queue[0]
-            queue_length = len(video_queue)
+        passed_videos = [v for v in video_queue if v.get("passed", False)]
+        if passed_videos:
+            video = passed_videos[0]
+            queue_length = len(passed_videos)
         else:
             video = None
             queue_length = 0
@@ -297,8 +314,10 @@ def video_player():
 @streamer_required
 def next_video():
     with queue_lock:
-        if video_queue:
-            played_video = video_queue.pop(0)
+        passed_videos = [v for v in video_queue if v.get("passed", False)]
+        if passed_videos:
+            played_video = passed_videos[0]
+            video_queue.remove(played_video)
             user_id = played_video["user_info"]["id"]
     return redirect(url_for("video_player"))
 

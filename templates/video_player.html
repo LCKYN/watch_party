@@ -11,17 +11,16 @@
             <div class="queue-info">
                 {% if queue_length > 0 %}
                     <p>
-                        Current queue: {{ queue_length }} video{% if queue_length != 1 %}s{% endif %} |
+                        Current queue: {{ queue_length }} passed video{% if queue_length != 1 %}s{% endif %} |
                         Current video:
                         Submitted by: {{ video.user_info.username }}#{{ video.user_info.discriminator }} |
                         Start time: {{ '%02d:%02d' % (video.start_time // 60, video.start_time % 60) }} |
                         End time: {{ '%02d:%02d' % (video.end_time // 60, video.end_time % 60) }}
                     </p>
                 {% else %}
-                    <p>Queue is empty</p>
+                    <p>No passed videos in queue</p>
                 {% endif %}
             </div>
-
             <form method="post" action="{{ url_for('next_video') }}">
                 <button type="submit" class="btn next-btn">Next Video</button>
             </form>
