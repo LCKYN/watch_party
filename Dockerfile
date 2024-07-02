@@ -15,12 +15,17 @@ FROM python:3-alpine AS runner
 WORKDIR /app
 
 COPY --from=builder /app/venv venv
-COPY app.py app.py
+# Set the working directory in the container
+WORKDIR /app
 
-ENV VIRTUAL_ENV=/app/venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
 ENV FLASK_APP=app/app.py
 
 EXPOSE 8080
 
-CMD ["python", "app.py"]
+CMD ["gunicorn", "--bind" , ":8080", "app:app"]
