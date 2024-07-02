@@ -133,6 +133,7 @@ def home():
                     "video_info": video_info,
                     "user_info": user_info,
                     "user_ip": user_ip,
+                    "user_id": user_id,
                 }
             )
 
