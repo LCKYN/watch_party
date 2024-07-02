@@ -6,7 +6,7 @@
         <div id="player"></div>
     </div>
 
-    <div class="content-wrapper">
+    <div class="player-content-wrapper">
         <div class="player-controls">
             <div class="queue-info">
                 {% if queue_length > 0 %}
@@ -14,8 +14,8 @@
                         Current queue: {{ queue_length }} passed video{% if queue_length != 1 %}s{% endif %} |
                         Current video:
                         Submitted by: {{ video.user_info.username }}#{{ video.user_info.discriminator }} |
-                        Start time: {{ '%02d:%02d' % (video.start_time // 60, video.start_time % 60) }} |
-                        End time: {{ '%02d:%02d' % (video.end_time // 60, video.end_time % 60) }}
+                        Time: {{ '%02d:%02d' % (video.start_time // 60, video.start_time % 60) }} -
+                        {{ '%02d:%02d' % (video.end_time // 60, video.end_time % 60) }}
                     </p>
                 {% else %}
                     <p>No passed videos in queue</p>

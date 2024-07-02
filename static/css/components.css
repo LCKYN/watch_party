@@ -37,11 +37,20 @@
     width: auto;
     margin: 0;
     white-space: nowrap;
-    background-color: #007bff;
-    color: white;
+    background-color: white;
+    color: #6c757d;  /* Gray text color */
+    border: 1px solid #6c757d;  /* Gray border */
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    border-radius: 4px;
+    transition: all 0.15s ease-in-out;
 }
+
 .next-btn:hover {
-    background-color: #0056b3;
+    background-color: #f8f9fa;  /* Light gray background on hover */
+    color: #5a6268;  /* Slightly darker gray text on hover */
+    border-color: #5a6268;  /* Slightly darker gray border on hover */
 }
 .ban-btn {
     background-color: #dc3545;
