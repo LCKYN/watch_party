@@ -199,6 +199,8 @@ def admin():
 
         elif action == "clear_user_submissions":
             user_id = request.form.get("user_id")
+            if isinstance(user_id, str):
+                user_id = user_id.strip()
             if user_id in user_submissions:
                 user_submissions[user_id] = MAX_SUBMISSION_DURATION
                 flash(f"Submission time for user {user_id} has been reset to maximum.", "success")
