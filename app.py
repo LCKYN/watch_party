@@ -23,7 +23,7 @@ app.secret_key = os.urandom(24)
 # Discord OAuth2 credentials
 CLIENT_ID = "1257410612024053811"
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-REDIRECT_URI = "http://localhost:8080/callback"
+REDIRECT_URI = "https://greankingdom.com/callback"
 
 # Discord API endpoints
 DISCORD_AUTH_URL = "https://discord.com/api/oauth2/authorize"
