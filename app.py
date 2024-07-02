@@ -145,6 +145,7 @@ def home():
                     "user_ip": user_ip,
                     "user_id": user_id,
                     "passed": False,
+                    "display_name": session["display_name"],
                 }
             )
 
@@ -266,6 +267,11 @@ def callback():
     headers = {"Authorization": f"Bot {BOT_TOKEN}"}  # You'll need to set up a bot and get its token
     guild_member_url = f"{DISCORD_API_URL}/guilds/{GUILD_ID}/members/{user_info['id']}"
     r = requests.get(guild_member_url, headers=headers)
+
+    if r.json()["nick"] is not None:
+        session["display_name"] = r.json()["nick"]
+    else:
+        session["display_name"] = r.json()["user"]["global_name"]
 
     if r.status_code == 200:
         # User is in the guild

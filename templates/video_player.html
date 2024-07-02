@@ -13,7 +13,7 @@
                     <p>
                         Current queue: {{ queue_length }} passed video{% if queue_length != 1 %}s{% endif %} |
                         Current video:
-                        Submitted by: {{ video.user_info.username }}#{{ video.user_info.discriminator }} |
+                        Submitted by: {{ video.display_name }} |
                         Time: {{ '%02d:%02d' % (video.start_time // 60, video.start_time % 60) }} -
                         {{ '%02d:%02d' % (video.end_time // 60, video.end_time % 60) }}
                     </p>
