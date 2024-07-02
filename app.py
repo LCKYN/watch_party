@@ -23,7 +23,7 @@ app.secret_key = os.urandom(24)
 # Discord OAuth2 credentials
 CLIENT_ID = "1257410612024053811"
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-REDIRECT_URI = "https://watch-party-7h2r.onrender.com/callback"
+REDIRECT_URI = "http://greankingdom.com/callback"
 
 # Discord API endpoints
 DISCORD_AUTH_URL = "https://discord.com/api/oauth2/authorize"
