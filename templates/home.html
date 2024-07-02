@@ -1,0 +1,126 @@
+<!-- templates/home.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Add Video to Queue</h1>
+
+<p>You have {{ submissions_left }} submission{% if submissions_left != 1 %}s{% endif %} left.</p>
+
+<form id="videoForm" method="post">
+    <label for="youtube_url">YouTube URL:</label>
+    <input type="text" id="youtube_url" name="youtube_url" required><br><br>
+
+    <label for="start_min">Start Time:</label>
+    <input type="number" id="start_min" name="start_min" min="0" value="0"> minutes
+    <input type="number" id="start_sec" name="start_sec" min="0" max="59" value="0"> seconds<br><br>
+
+    <label for="end_min">End Time:</label>
+    <input type="number" id="end_min" name="end_min" min="0" value="0"> minutes
+    <input type="number" id="end_sec" name="end_sec" min="0" max="59" value="0"> seconds<br><br>
+
+    <button type="button" onclick="validateAndShowExample()" class="btn example-btn">Show Example</button>
+    <button type="submit" onclick="return validateForm()" class="btn submit-btn" {% if submissions_left == 0 %}disabled{% endif %}>Send Video</button>
+</form>
+
+<div id="example"style="display: none;">
+    <h3>Example:</h3>
+    <p id="example-url"></p>
+    <p id="example-start-time"></p>
+    <p id="example-end-time"></p>
+    <div class="example-video-container">
+        <iframe id="example-video"
+                src=""
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+    </div>
+</div>
+
+<!-- Thai instructions -->
+<div class="thai-instructions">
+    <h2>คำแนะนำ (Instructions)</h2>
+    <ol>
+        <li>วางลิงก์วิดีโอ YouTube ในช่อง "YouTube URL"</li>
+        <li>ระบุเวลาเริ่มต้นของคลิปที่ต้องการในช่อง "Start Time"</li>
+        <li>ระบุเวลาสิ้นสุดของคลิปที่ต้องการในช่อง "End Time"</li>
+        <li>คลิก "Show Example" เพื่อดูตัวอย่างคลิปที่เลือก</li>
+        <li>หากพอใจกับตัวอย่าง ให้คลิก "Send Video" เพื่อส่งวิดีโอ</li>
+        <li>โปรดทราบว่าความยาวของคลิปต้องไม่เกิน 3 นาที</li>
+    </ol>
+</div>
+
+
+<script>
+    function validateTimes() {
+        var startMin = parseInt(document.getElementById('start_min').value) || 0;
+        var startSec = parseInt(document.getElementById('start_sec').value) || 0;
+        var endMin = parseInt(document.getElementById('end_min').value) || 0;
+        var endSec = parseInt(document.getElementById('end_sec').value) || 0;
+
+        var startTime = startMin * 60 + startSec;
+        var endTime = endMin * 60 + endSec;
+
+        if (startTime >= endTime) {
+            alert("End time must be after start time.");
+            return false;
+        }
+
+        if (endTime - startTime > 180) {
+            alert("Video clip cannot be longer than 3 minutes.");
+            return false;
+        }
+
+        return true;
+    }
+
+    function validateAndShowExample() {
+        if (validateTimes()) {
+            showExample();
+        }
+    }
+
+    function validateForm() {
+        if (!validateTimes()) {
+            return false;
+        }
+        // Add any additional form validation here if needed
+        return true;
+    }
+
+    function showExample() {
+        // Your existing showExample code here
+        var youtubeUrl = document.getElementById('youtube_url').value;
+        var startMin = parseInt(document.getElementById('start_min').value) || 0;
+        var startSec = parseInt(document.getElementById('start_sec').value) || 0;
+        var endMin = parseInt(document.getElementById('end_min').value) || 0;
+        var endSec = parseInt(document.getElementById('end_sec').value) || 0;
+
+        var videoId = extractVideoID(youtubeUrl);
+        if (!videoId) {
+            alert('Invalid YouTube URL');
+            return;
+        }
+
+        var startTime = startMin * 60 + startSec;
+        var endTime = endMin * 60 + endSec;
+
+        document.getElementById('example-url').textContent = 'YouTube URL: ' + youtubeUrl;
+        document.getElementById('example-start-time').textContent = 'Start Time: ' + startMin + ' minutes ' + startSec + ' seconds';
+        document.getElementById('example-end-time').textContent = 'End Time: ' + endMin + ' minutes ' + endSec + ' seconds';
+
+        var embedUrl = 'https://www.youtube.com/embed/' + videoId + '?start=' + startTime + '&end=' + endTime;
+        document.getElementById('example-video').src = embedUrl;
+
+        document.getElementById('example').style.display = 'block';
+    }
+
+    function extractVideoID(url) {
+        var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+        var match = url.match(regExp);
+        return (match && match[7].length == 11) ? match[7] : false;
+    }
+    </script>
+{% endblock %}
+
+

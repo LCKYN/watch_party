@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if video %}
+    <div id="player-container">
+        <div id="player"></div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="player-controls">
+            <div class="queue-info">
+                {% if queue_length > 0 %}
+                    <p>
+                        Current queue: {{ queue_length }} video{% if queue_length != 1 %}s{% endif %} |
+                        Current video:
+                        Submitted by: {{ video.user_info.username }}#{{ video.user_info.discriminator }} |
+                        Start time: {{ '%02d:%02d' % (video.start_time // 60, video.start_time % 60) }} |
+                        End time: {{ '%02d:%02d' % (video.end_time // 60, video.end_time % 60) }}
+                    </p>
+                {% else %}
+                    <p>Queue is empty</p>
+                {% endif %}
+            </div>
+
+            <form method="post" action="{{ url_for('next_video') }}">
+                <button type="submit" class="btn next-btn">Next Video</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        var player;
+        var endTime = {{ video.end_time }};
+        var checkInterval;
+
+        function onYouTubeIframeAPIReady() {
+            console.log("YouTube API Ready");
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                videoId: '{{ video.video_id }}',
+                playerVars: {
+                    'autoplay': 1,
+                    'start': {{ video.start_time }},
+                    'controls': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            console.log("Player Ready");
+            event.target.playVideo();
+            checkInterval = setInterval(checkTime, 1000);
+        }
+
+        function checkTime() {
+            if (player && player.getCurrentTime) {
+                var currentTime = player.getCurrentTime();
+                console.log("Current time:", currentTime, "End time:", endTime);
+                if (currentTime >= endTime) {
+                    clearInterval(checkInterval);
+                    player.stopVideo();
+                    console.log("Video ended, waiting 3 seconds before next video");
+                    setTimeout(clickNextVideo, 3000);
+                }
+            }
+        }
+
+        function clickNextVideo() {
+            console.log("Clicking next video button");
+            document.querySelector('.btn.next-btn').click();
+        }
+
+        function onPlayerStateChange(event) {
+            console.log("Player State Changed:", event.data);
+            if (event.data == YT.PlayerState.ENDED) {
+                clearInterval(checkInterval);
+                player.stopVideo();
+                console.log("Video ended naturally, waiting 3 seconds before next video");
+                setTimeout(clickNextVideo, 3000);
+            }
+        }
+
+        function onPlayerError(event) {
+            console.error("Player Error:", event.data);
+            clearInterval(checkInterval);
+            console.log("Error occurred, waiting 3 seconds before next video");
+            setTimeout(clickNextVideo, 3000);
+        }
+
+        // Ensure the API is loaded
+        if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        } else {
+            onYouTubeIframeAPIReady();
+        }
+    </script>
+{% else %}
+    <div class="content-wrapper">
+        <h1>Video Player</h1>
+        <p>No videos in queue</p>
+    </div>
+{% endif %}
+{% endblock %}

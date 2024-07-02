@@ -1,0 +1,34 @@
+/* Queue Management Styles */
+.video-item {
+    display: flex;
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.video-container {
+    flex: 0 0 50%;
+    margin-right: 20px;
+    position: relative;
+    padding-bottom: 28.125%; /* 16:9 Aspect Ratio (9 / 16 = 0.5625) */
+    height: 0;
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.video-details {
+    flex: 1;
+}
+
+.video-details h2 {
+    margin-top: 0;
+}

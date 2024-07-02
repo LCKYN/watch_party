@@ -1,0 +1,36 @@
+<!-- templates/queue_management.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Queue Management</h1>
+
+{% for video in video_queue %}
+<div class="video-item">
+    <div class="video-container">
+        <iframe width="100%" height="100%"
+                src="https://www.youtube.com/embed/{{ video.video_id }}?start={{ video.start_time }}&end={{ video.end_time }}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+    </div>
+    <div class="video-details">
+        <h2>Queue Number: {{ loop.index }}</h2>
+        <p><strong>Submitted By:</strong> {{ video.user_info.username }}#{{ video.user_info.discriminator }}</p>
+        <p><strong>Start Time:</strong> {{ '%02d:%02d' % (video.start_time // 60, video.start_time % 60) }}</p>
+        <p><strong>End Time:</strong> {{ '%02d:%02d' % (video.end_time // 60, video.end_time % 60) }}</p>
+        {% set duration = video.end_time - video.start_time %}
+        <p><strong>Duration:</strong> {{ '%02d:%02d' % (duration // 60, duration % 60) }}</p>
+        <div class="button-group">
+            <form action="{{ url_for('delete_from_queue', queue_number=loop.index0) }}" method="post">
+                <button type="submit" class="btn delete-btn">Delete</button>
+            </form>
+            <form action="{{ url_for('ban_user', user_id=video.user_info.id) }}" method="post">
+                <button type="submit" class="btn ban-btn">Ban User</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

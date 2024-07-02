@@ -1,0 +1,57 @@
+/* Flash Messages */
+.flash {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    width: 100%;
+}
+.flash.success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+.flash.error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+}
+.delete-btn {
+    background-color: #ff4136;
+    color: white;
+}
+.delete-btn:hover {
+    background-color: #ff1a1a;
+}
+.next-btn {
+    width: auto;
+    margin: 0;
+    white-space: nowrap;
+    background-color: #007bff;
+    color: white;
+}
+.next-btn:hover {
+    background-color: #0056b3;
+}
+.ban-btn {
+    background-color: #dc3545;
+    color: white;
+}
+.ban-btn:hover {
+    background-color: #c82333;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}

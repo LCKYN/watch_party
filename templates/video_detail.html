@@ -1,0 +1,55 @@
+<!-- templates/video_detail.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Video Details</h1>
+
+<h2>Discord User Information</h2>
+<p>User ID: {{ user_info.id }}</p>
+<p>Username: {{ user_info.username }}#{{ user_info.discriminator }}</p>
+
+<h2>{{ video_info.title }}</h2>
+
+{% if video_info.age_restricted %}
+    <p><strong>Warning:</strong> This video is age-restricted.</p>
+{% endif %}
+
+<div id="player"></div>
+
+<h3>Video Information</h3>
+<p>Video ID: {{ video_id }}</p>
+<p>Start Time: {{ start_time }} seconds</p>
+<p>End Time: {{ end_time }} seconds</p>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+    var player;
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+            height: '360',
+            width: '640',
+            videoId: '{{ video_id }}',
+            playerVars: {
+                'autoplay': 1,
+                'start': {{ start_time }},
+                'end': {{ end_time }},
+                'controls': 1
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        event.target.playVideo();
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.ENDED) {
+            player.stopVideo();
+        }
+    }
+</script>
+{% endblock %}
