@@ -382,6 +382,8 @@ def extract_video_id(url):
             return query.path.split("/")[2]
         if query.path[:3] == "/v/":
             return query.path.split("/")[2]
+        if query.path[:8] == "/shorts/":
+            return query.path.split("/")[2]
     return None
 
 
