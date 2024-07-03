@@ -268,14 +268,15 @@ def callback():
     guild_member_url = f"{DISCORD_API_URL}/guilds/{GUILD_ID}/members/{user_info['id']}"
     r = requests.get(guild_member_url, headers=headers)
 
-    if r.json()["nick"] is not None:
-        session["display_name"] = r.json()["nick"]
-    else:
-        session["display_name"] = r.json()["user"]["global_name"]
-
     if r.status_code == 200:
         # User is in the guild
         session["in_guild"] = True
+
+        if r.json()["nick"] is not None:
+            session["display_name"] = r.json()["nick"]
+        else:
+            session["display_name"] = r.json()["user"]["global_name"]
+
         return redirect(url_for("home"))
     else:
         # User is not in the guild
