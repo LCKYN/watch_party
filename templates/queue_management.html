@@ -4,7 +4,7 @@
 {% block content %}
 <h1>Queue Management</h1>
 
-{% for video in video_queue %}
+{% for video in videos %}
 <div class="video-item">
     <div class="video-container">
         <iframe width="100%" height="100%"
@@ -15,7 +15,7 @@
         </iframe>
     </div>
     <div class="video-details">
-        <h2>Queue Number: {{ loop.index }}</h2>
+        <h2>Queue Number: {{ (page - 1) * per_page + loop.index }}</h2>
         <p><strong>Submitted By:</strong> {{ video.display_name }}  ( {{ video.user_id }} )</p>
         <p><strong>IP:</strong> {{ video.user_ip }}</p>
         <p><strong>Start Time:</strong> {{ '%02d:%02d' % (video.start_time // 60, video.start_time % 60) }}</p>
@@ -39,5 +39,24 @@
     </div>
 </div>
 {% endfor %}
+
+<!-- Pagination -->
+<div class="pagination">
+    {% if page > 1 %}
+        <a href="{{ url_for('queue_management', page=page-1) }}">&laquo; Previous</a>
+    {% endif %}
+
+    {% for p in range(1, total_pages + 1) %}
+        {% if p == page %}
+            <span class="current-page">{{ p }}</span>
+        {% else %}
+            <a href="{{ url_for('queue_management', page=p) }}">{{ p }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page < total_pages %}
+        <a href="{{ url_for('queue_management', page=page+1) }}">Next &raquo;</a>
+    {% endif %}
+</div>
 
 {% endblock %}

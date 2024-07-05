@@ -32,3 +32,20 @@
 .video-details h2 {
     margin-top: 0;
 }
+
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination a, .pagination span {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+}
+
+.pagination .current-page {
+    background-color: #007bff;
+    color: white;
+}

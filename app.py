@@ -2,6 +2,7 @@ import os
 import time
 import uuid
 from functools import wraps  # Add this line
+from math import ceil
 from threading import Lock, RLock
 from time import time
 from urllib.parse import parse_qs, urlparse
@@ -29,8 +30,8 @@ app.secret_key = os.urandom(24)
 CLIENT_ID = "1257410612024053811"
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-REDIRECT_URI = "http://greankingdom.com/callback"
-# REDIRECT_URI = "http://127.0.0.1:8080/callback"
+# REDIRECT_URI = "http://greankingdom.com/callback"
+REDIRECT_URI = "http://127.0.0.1:8080/callback"
 
 GUILD_ID = "939695971384844338"  # FifaTargrean server
 
@@ -309,8 +310,19 @@ def delete_from_queue(video_id):
 @login_required
 @admin_required
 def queue_management():
+    page = request.args.get("page", 1, type=int)
+    per_page = 5
+
     with queue_lock:
-        return render_template("queue_management.html", video_queue=video_queue)
+        total_videos = len(video_queue)
+        total_pages = ceil(total_videos / per_page)
+        start = (page - 1) * per_page
+        end = start + per_page
+        videos = video_queue[start:end]
+
+    return render_template(
+        "queue_management.html", videos=videos, page=page, per_page=per_page, total_pages=total_pages
+    )
 
 
 @app.route("/ban_user/<string:user_id>", methods=["POST"])
