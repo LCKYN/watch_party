@@ -30,8 +30,8 @@ app.secret_key = os.urandom(24)
 CLIENT_ID = "1257410612024053811"
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-# REDIRECT_URI = "http://greankingdom.com/callback"
-REDIRECT_URI = "http://127.0.0.1:8080/callback"
+REDIRECT_URI = "http://greankingdom.com/callback"
+# REDIRECT_URI = "http://127.0.0.1:8080/callback"
 
 GUILD_ID = "939695971384844338"  # FifaTargrean server
 
